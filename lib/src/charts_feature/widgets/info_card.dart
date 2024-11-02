@@ -12,13 +12,15 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 36),
-    width: 350,
+      width: 350,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Theme.of(context).colorScheme.tertiaryContainer,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      child: Text( header,
+      child: Text(
+        header,
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: Theme.of(context).colorScheme.surfaceContainer,
           fontSize: 18,

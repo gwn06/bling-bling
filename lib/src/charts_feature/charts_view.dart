@@ -172,71 +172,7 @@ class _ChartsViewState extends State<ChartsView> {
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
-          title: InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                showDragHandle: true,
-                context: context,
-                builder: (context) {
-                  return SizedBox(
-                    height: 650,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22),
-                        child: Column(
-                          children: [
-                            const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "App bar title",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            TextField(
-                              maxLength: 18,
-                              controller: appbarController,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Title",
-                              ),
-                              maxLines: 1,
-                              onChanged: (value) {
-                                if (value.isEmpty) return;
-                                setState(() {
-                                  appbarController.text = value;
-                                  SPHelper.sp
-                                      .saveString(SPStrings.appBarTitle, value);
-                                });
-                              },
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    SPHelper.sp.saveString(
-                                        SPStrings.appBarTitle,
-                                        SPStrings.defaultAppBarTitle);
-                                  });
-                                },
-                                child: const Text("Reset"),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            child: Text(appbarController.text,
-                style: const TextStyle(fontSize: 36)),
-          ),
+          title: buildAppBarWidget(context, appbarController),
           actions: [
             IconButton.filled(
               style: ButtonStyle(
@@ -262,323 +198,391 @@ class _ChartsViewState extends State<ChartsView> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              Flexible(
-                child: InkWell(
-                  onTap: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      showDragHandle: true,
-                      builder: (context) {
-                        return SizedBox(
-                          height: 650,
-                          child: Center(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 22),
-                              child: Column(
-                                children: <Widget>[
-                                  const Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      "Info",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TextField(
-                                    maxLength: 100,
-                                    controller: headerInfoController,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "Header",
-                                    ),
-                                    maxLines: 2,
-                                    onChanged: (value) {
-                                      if (value.isEmpty) return;
-                                      setState(() {
-                                        headerInfoController.text = value;
-                                        SPHelper.sp.saveString(
-                                            SPStrings.headerInfoText, value);
-                                      });
-                                    },
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          SPHelper.sp.saveString(
-                                              SPStrings.headerInfoText,
-                                              SPStrings.defaultHeaderInfoText);
-                                        });
-                                      },
-                                      child: const Text("Reset"),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: InfoCard(header: headerInfoText),
-                ),
-              ),
+              buildHeaderInfoWidget(
+                  context, headerInfoController, headerInfoText),
               const SizedBox(height: 10),
-              InkWell(
-                onTap: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    showDragHandle: true,
-                    builder: (context) {
-                      final operationsItems = [
-                        LogicOperatorLabel.equal,
-                        LogicOperatorLabel.greaterThan,
-                        LogicOperatorLabel.greaterThanOrEqual,
-                        LogicOperatorLabel.lessThan,
-                        LogicOperatorLabel.lessThanOrEqual,
-                      ];
-
-                      return SingleChildScrollView(
-                        child:
-                            StatefulBuilder(builder: (context, setSheetState) {
-                          return SizedBox(
-                            height: 650,
-                            child: Center(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 22),
-                                child: Column(
-                                  // mainAxisAlignment: MainAxisAlignment.center,
-                                  // mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "Water Distance",
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 14),
-                                    TextField(
-                                      controller: emptyTankController,
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        labelText: "Empty tank",
-                                        suffixText: "cm",
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isEmpty) return;
-                                        var parsedValue =
-                                            double.tryParse(value) ?? 0;
-                                        SPHelper.sp.saveDouble(
-                                            SPStrings.waterDistanceEmpty,
-                                            parsedValue);
-                                      },
-                                    ),
-                                    const SizedBox(height: 14),
-                                    TextField(
-                                      controller: fullTankController,
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        labelText: "Full tank",
-                                        suffixText: "cm",
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isEmpty) return;
-                                        var parsedValue =
-                                            double.tryParse(value) ?? 0;
-                                        SPHelper.sp.saveDouble(
-                                            SPStrings.waterDistanceFull,
-                                            parsedValue);
-                                      },
-                                    ),
-                                    const SizedBox(height: 18),
-                                    const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        "Notification",
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 18),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          flex: 4,
-                                          child: DropdownButton<String>(
-                                            value: selectedOperation1,
-                                            items: operationsItems
-                                                .map(
-                                                  (item) =>
-                                                      DropdownMenuItem<String>(
-                                                    value: item.value,
-                                                    child: Text(item.label),
-                                                  ),
-                                                )
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setSheetState(() {
-                                                selectedOperation1 = value!;
-                                                SPHelper.sp.saveString(
-                                                    SPStrings
-                                                        .selectedLogicalOperation1,
-                                                    value);
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          flex: 2,
-                                          child: TextField(
-                                            controller: tankLevel1Controller,
-                                            keyboardType: TextInputType.number,
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter
-                                                  .digitsOnly,
-                                              FilteringTextInputFormatter.allow(
-                                                  RegExp(r'[0-9]')),
-                                              // Allow only digits
-                                            ],
-                                            decoration: const InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              labelText: "Tank level",
-                                              suffixText: "%",
-                                            ),
-                                            onChanged: (value) {
-                                              if (value.isEmpty) return;
-                                              var parsedValue =
-                                                  int.tryParse(value) ?? 0;
-                                              SPHelper.sp.saveInt(
-                                                  SPStrings.tankLevel1,
-                                                  parsedValue);
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Flexible(
-                                            flex: 1,
-                                            child: Switch(
-                                              value: switchTankLevel1,
-                                              onChanged: (value) {
-                                                setSheetState(() {
-                                                  switchTankLevel1 = value;
-                                                  SPHelper.sp.saveBool(
-                                                      SPStrings
-                                                          .switchTankLevel1,
-                                                      value);
-                                                });
-                                              },
-                                            ))
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          flex: 4,
-                                          child: DropdownButton<String>(
-                                            value: selectedOperation2,
-                                            items: operationsItems
-                                                .map(
-                                                  (item) =>
-                                                      DropdownMenuItem<String>(
-                                                    value: item.value,
-                                                    child: Text(item.label),
-                                                  ),
-                                                )
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setSheetState(() {
-                                                selectedOperation2 = value!;
-                                                SPHelper.sp.saveString(
-                                                    SPStrings
-                                                        .selectedLogicalOperation2,
-                                                    value);
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          flex: 2,
-                                          child: TextField(
-                                            controller: tankLevel2Controller,
-                                            keyboardType: TextInputType.number,
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter
-                                                  .digitsOnly,
-                                              FilteringTextInputFormatter.allow(
-                                                  RegExp(r'[0-9]')),
-                                              // Allow only digits
-                                            ],
-                                            decoration: const InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              labelText: "Tank level",
-                                              suffixText: "%",
-                                            ),
-                                            onChanged: (value) {
-                                              if (value.isEmpty) return;
-                                              var parsedValue =
-                                                  int.tryParse(value) ?? 0;
-                                              SPHelper.sp.saveInt(
-                                                  SPStrings.tankLevel2,
-                                                  parsedValue);
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Flexible(
-                                            flex: 1,
-                                            child: Switch(
-                                              value: switchTankLevel2,
-                                              onChanged: (value) {
-                                                setSheetState(() {
-                                                  switchTankLevel2 = value;
-                                                  SPHelper.sp.saveBool(
-                                                      SPStrings
-                                                          .switchTankLevel2,
-                                                      value);
-                                                });
-                                              },
-                                            ))
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      );
-                    },
-                  );
-                },
-                child: const WaterLevelCard(),
-              ),
+              buildWaterLevelWidget(
+                  context,
+                  emptyTankController,
+                  fullTankController,
+                  selectedOperation1,
+                  tankLevel1Controller,
+                  switchTankLevel1,
+                  selectedOperation2,
+                  tankLevel2Controller,
+                  switchTankLevel2),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  InkWell buildAppBarWidget(
+      BuildContext context, TextEditingController appbarController) {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          showDragHandle: true,
+          context: context,
+          builder: (context) {
+            return SizedBox(
+              height: 650,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  child: Column(
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "App bar title",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        maxLength: 18,
+                        controller: appbarController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Title",
+                        ),
+                        maxLines: 1,
+                        onChanged: (value) {
+                          if (value.isEmpty) return;
+                          setState(() {
+                            appbarController.text = value;
+                            SPHelper.sp
+                                .saveString(SPStrings.appBarTitle, value);
+                          });
+                        },
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              SPHelper.sp.saveString(SPStrings.appBarTitle,
+                                  SPStrings.defaultAppBarTitle);
+                            });
+                          },
+                          child: const Text("Reset"),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      child: Text(appbarController.text, style: const TextStyle(fontSize: 36)),
+    );
+  }
+
+  InkWell buildWaterLevelWidget(
+      BuildContext context,
+      TextEditingController emptyTankController,
+      TextEditingController fullTankController,
+      String selectedOperation1,
+      TextEditingController tankLevel1Controller,
+      bool switchTankLevel1,
+      String selectedOperation2,
+      TextEditingController tankLevel2Controller,
+      bool switchTankLevel2) {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet<void>(
+          context: context,
+          showDragHandle: true,
+          builder: (context) {
+            final operationsItems = [
+              LogicOperatorLabel.equal,
+              LogicOperatorLabel.greaterThan,
+              LogicOperatorLabel.greaterThanOrEqual,
+              LogicOperatorLabel.lessThan,
+              LogicOperatorLabel.lessThanOrEqual,
+            ];
+
+            return SingleChildScrollView(
+              child: StatefulBuilder(builder: (context, setSheetState) {
+                return SizedBox(
+                  height: 650,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 22),
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        // mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Water Distance",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: emptyTankController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Empty tank",
+                              suffixText: "cm",
+                            ),
+                            onChanged: (value) {
+                              if (value.isEmpty) return;
+                              var parsedValue = double.tryParse(value) ?? 0;
+                              SPHelper.sp.saveDouble(
+                                  SPStrings.waterDistanceEmpty, parsedValue);
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: fullTankController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Full tank",
+                              suffixText: "cm",
+                            ),
+                            onChanged: (value) {
+                              if (value.isEmpty) return;
+                              var parsedValue = double.tryParse(value) ?? 0;
+                              SPHelper.sp.saveDouble(
+                                  SPStrings.waterDistanceFull, parsedValue);
+                            },
+                          ),
+                          const SizedBox(height: 18),
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Notification",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                flex: 4,
+                                child: DropdownButton<String>(
+                                  value: selectedOperation1,
+                                  items: operationsItems
+                                      .map(
+                                        (item) => DropdownMenuItem<String>(
+                                          value: item.value,
+                                          child: Text(item.label),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setSheetState(() {
+                                      selectedOperation1 = value!;
+                                      SPHelper.sp.saveString(
+                                          SPStrings.selectedLogicalOperation1,
+                                          value);
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                flex: 2,
+                                child: TextField(
+                                  controller: tankLevel1Controller,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9]')),
+                                    // Allow only digits
+                                  ],
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: "Tank level",
+                                    suffixText: "%",
+                                  ),
+                                  onChanged: (value) {
+                                    if (value.isEmpty) return;
+                                    var parsedValue = int.tryParse(value) ?? 0;
+                                    SPHelper.sp.saveInt(
+                                        SPStrings.tankLevel1, parsedValue);
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(
+                                  flex: 1,
+                                  child: Switch(
+                                    value: switchTankLevel1,
+                                    onChanged: (value) {
+                                      setSheetState(() {
+                                        switchTankLevel1 = value;
+                                        SPHelper.sp.saveBool(
+                                            SPStrings.switchTankLevel1, value);
+                                      });
+                                    },
+                                  ))
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                flex: 4,
+                                child: DropdownButton<String>(
+                                  value: selectedOperation2,
+                                  items: operationsItems
+                                      .map(
+                                        (item) => DropdownMenuItem<String>(
+                                          value: item.value,
+                                          child: Text(item.label),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setSheetState(() {
+                                      selectedOperation2 = value!;
+                                      SPHelper.sp.saveString(
+                                          SPStrings.selectedLogicalOperation2,
+                                          value);
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                flex: 2,
+                                child: TextField(
+                                  controller: tankLevel2Controller,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9]')),
+                                    // Allow only digits
+                                  ],
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: "Tank level",
+                                    suffixText: "%",
+                                  ),
+                                  onChanged: (value) {
+                                    if (value.isEmpty) return;
+                                    var parsedValue = int.tryParse(value) ?? 0;
+                                    SPHelper.sp.saveInt(
+                                        SPStrings.tankLevel2, parsedValue);
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(
+                                  flex: 1,
+                                  child: Switch(
+                                    value: switchTankLevel2,
+                                    onChanged: (value) {
+                                      setSheetState(() {
+                                        switchTankLevel2 = value;
+                                        SPHelper.sp.saveBool(
+                                            SPStrings.switchTankLevel2, value);
+                                      });
+                                    },
+                                  ))
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            );
+          },
+        );
+      },
+      child: const WaterLevelCard(),
+    );
+  }
+
+  InkWell buildHeaderInfoWidget(BuildContext context,
+      TextEditingController headerInfoController, String headerInfoText) {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet<void>(
+          context: context,
+          showDragHandle: true,
+          builder: (context) {
+            return SizedBox(
+              height: 650,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  child: Column(
+                    children: <Widget>[
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Info",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        maxLength: 100,
+                        controller: headerInfoController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Header",
+                        ),
+                        maxLines: 2,
+                        onChanged: (value) {
+                          if (value.isEmpty) return;
+                          setState(() {
+                            headerInfoController.text = value;
+                            SPHelper.sp
+                                .saveString(SPStrings.headerInfoText, value);
+                          });
+                        },
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              SPHelper.sp.saveString(SPStrings.headerInfoText,
+                                  SPStrings.defaultHeaderInfoText);
+                            });
+                          },
+                          child: const Text("Reset"),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      child: InfoCard(header: headerInfoText),
     );
   }
 }

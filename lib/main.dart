@@ -9,6 +9,7 @@ import 'package:bling_bling/src/core/utils/functions.dart';
 import 'package:bling_bling/src/core/utils/sp_helper.dart';
 import 'package:bling_bling/src/core/utils/sp_strings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -121,7 +122,12 @@ void onStart(ServiceInstance service) async {
   FlutterLocalNotificationsPlugin();
   await SPHelper.sp.initSharedPreferences();
 
-  final firestore = FirebaseFirestore.instance;
+  // final firestore = FirebaseFirestore.instance;
+
+  DatabaseReference distanceRef =
+  FirebaseDatabase.instance.ref('arduino/distance');
+
+
 
 
   blingNotification({required double distance, required double waterLevel}) {
@@ -158,14 +164,15 @@ void onStart(ServiceInstance service) async {
     );
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> waterLevelStream =
-  firestore.collection('water_level').doc('arduino').snapshots();
+  // Stream<DocumentSnapshot<Map<String, dynamic>>> waterLevelStream =
+  // firestore.collection('water_level').doc('arduino').snapshots();
 
- final waterLevelListen = waterLevelStream.listen((snapshot) async {
+  StreamSubscription<DatabaseEvent> waterLevelListen;
 
-    if (snapshot.exists) {
-      final data = snapshot.data()!;
-      final distance = double.parse(data['distance'].toString());
+  waterLevelListen= distanceRef.onValue.listen((DatabaseEvent event) async {
+    // print("Realtime $data");
+    if(event.snapshot.exists) {
+      final distance = (event.snapshot.value as num).toDouble();
       print('Water level: ${distance}');
 
       await SPHelper.sp.prefs?.reload();
@@ -231,8 +238,83 @@ void onStart(ServiceInstance service) async {
           }
         }
       }
+
     }
+
   });
+
+ // final waterLevelListen = waterLevelStream.listen((snapshot) async {
+ //
+ //    if (snapshot.exists) {
+ //      final data = snapshot.data()!;
+ //      final distance = double.parse(data['distance'].toString());
+ //      print('Water level: ${distance}');
+ //
+ //      await SPHelper.sp.prefs?.reload();
+ //
+ //      final selectedOperation1 = SPHelper.sp.getString(
+ //          SPStrings.selectedLogicalOperation1) ??
+ //          LogicOperatorLabel.lessThanOrEqual.value;
+ //      final selectedOperation2 = SPHelper.sp.getString(
+ //          SPStrings.selectedLogicalOperation2) ??
+ //          LogicOperatorLabel.greaterThanOrEqual.value;
+ //      final switchTankLevel1 = SPHelper.sp.getBool(
+ //          SPStrings.switchTankLevel1) ?? false;
+ //      final switchTankLevel2 = SPHelper.sp.getBool(
+ //          SPStrings.switchTankLevel2) ?? false;
+ //      final tankLevel1 = SPHelper.sp.getInt(SPStrings.tankLevel1) ?? 7;
+ //      final tankLevel2 = SPHelper.sp.getInt(SPStrings.tankLevel2) ?? 95;
+ //
+ //
+ //      final commands = [
+ //        (selectedOperation1, switchTankLevel1, tankLevel1),
+ //        (selectedOperation2, switchTankLevel2, tankLevel2)
+ //      ];
+ //
+ //      final currentTankLevel = getTankLevelPercentage(distance);
+ //
+ //      // BUG
+ //      // final currentTankLevelFloor = currentTankLevel.floor();
+ //
+ //      for (final command in commands) {
+ //        for (final operator in LogicOperatorLabel.values) {
+ //          if (operator.value == command.$1 && command.$2) {
+ //            switch (operator) {
+ //              case LogicOperatorLabel.greaterThanOrEqual:
+ //                currentTankLevel>= command.$3
+ //                    ? blingNotification(
+ //                    waterLevel: currentTankLevel, distance: distance)
+ //                    : null;
+ //                break;
+ //              case LogicOperatorLabel.greaterThan:
+ //                currentTankLevel> command.$3
+ //                    ? blingNotification(
+ //                    waterLevel: currentTankLevel, distance: distance)
+ //                    : null;
+ //              case LogicOperatorLabel.lessThanOrEqual:
+ //                currentTankLevel<= command.$3
+ //                    ? blingNotification(
+ //                    waterLevel: currentTankLevel, distance: distance)
+ //                    : null;
+ //                break;
+ //              case LogicOperatorLabel.lessThan:
+ //                currentTankLevel< command.$3
+ //                    ? blingNotification(
+ //                    waterLevel: currentTankLevel, distance: distance)
+ //                    : null;
+ //                break;
+ //              case LogicOperatorLabel.equal:
+ //                currentTankLevel== command.$3
+ //                    ? blingNotification(
+ //                    waterLevel: currentTankLevel, distance: distance)
+ //                    : null;
+ //                break;
+ //            }
+ //          }
+ //        }
+ //      }
+ //    }
+ //  });
 
   service.on("stop").listen((event) {
     waterLevelListen.cancel();

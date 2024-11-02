@@ -34,8 +34,71 @@ class ChartsView extends StatefulWidget {
 }
 
 class _ChartsViewState extends State<ChartsView> {
+  var headerInfoText = SPHelper.sp.getString(SPStrings.headerInfoText) ??
+      SPStrings.defaultHeaderInfoText;
+
+  var waterDistanceEmpty =
+      SPHelper.sp.getDouble(SPStrings.waterDistanceEmpty) ?? 0;
+  var waterDistanceFull =
+      SPHelper.sp.getDouble(SPStrings.waterDistanceFull) ?? 0;
+  var selectedOperation1 =
+      SPHelper.sp.getString(SPStrings.selectedLogicalOperation1) ??
+          LogicOperatorLabel.lessThanOrEqual.value;
+  var selectedOperation2 =
+      SPHelper.sp.getString(SPStrings.selectedLogicalOperation2) ??
+          LogicOperatorLabel.greaterThanOrEqual.value;
+  var tankLevel1 = SPHelper.sp.getInt(SPStrings.tankLevel1) ?? 7;
+  var tankLevel2 = SPHelper.sp.getInt(SPStrings.tankLevel2) ?? 95;
+  var switchTankLevel1 =
+      SPHelper.sp.getBool(SPStrings.switchTankLevel1) ?? false;
+  var switchTankLevel2 =
+      SPHelper.sp.getBool(SPStrings.switchTankLevel2) ?? false;
+
+  var appbarTitle = SPHelper.sp.getString(SPStrings.appBarTitle) ??
+      SPStrings.defaultAppBarTitle;
+
+  late TextEditingController appbarController;
+
+  late TextEditingController headerInfoController;
+
+  late TextEditingController emptyTankController;
+
+  late TextEditingController fullTankController;
+
+  late TextEditingController tankLevel1Controller;
+
+  late TextEditingController tankLevel2Controller;
+
+  var isDialogOpen = false;
+
+  @override
+  void initState() {
+    appbarController = TextEditingController(text: appbarTitle);
+    headerInfoController = TextEditingController(text: headerInfoText);
+    emptyTankController =
+        TextEditingController(text: waterDistanceEmpty.toString());
+    fullTankController =
+        TextEditingController(text: waterDistanceFull.toString());
+    tankLevel1Controller = TextEditingController(text: tankLevel1.toString());
+    tankLevel2Controller = TextEditingController(text: tankLevel2.toString());
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    appbarController.dispose();
+    headerInfoController.dispose();
+    emptyTankController.dispose();
+    fullTankController.dispose();
+    tankLevel1Controller.dispose();
+    tankLevel2Controller.dispose();
+    super.dispose();
+  }
+
   void _showWaterLevelWarningDialog(BuildContext context,
       {required double distance, required double waterLevel}) {
+    if (isDialogOpen) return;
+    isDialogOpen = true;
     Vibration.hasVibrator().then(
       (value) {
         if (value != null && value) {
@@ -70,6 +133,7 @@ class _ChartsViewState extends State<ChartsView> {
               const SizedBox(height: 15),
               FilledButton(
                 onPressed: () {
+                  isDialogOpen = false;
                   Vibration.cancel();
                   Navigator.pop(context);
                 },
@@ -79,45 +143,13 @@ class _ChartsViewState extends State<ChartsView> {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      isDialogOpen = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var headerInfoText = SPHelper.sp.getString(SPStrings.headerInfoText) ??
-        SPStrings.defaultHeaderInfoText;
-
-    var waterDistanceEmpty =
-        SPHelper.sp.getDouble(SPStrings.waterDistanceEmpty) ?? 0;
-    var waterDistanceFull =
-        SPHelper.sp.getDouble(SPStrings.waterDistanceFull) ?? 0;
-    var selectedOperation1 =
-        SPHelper.sp.getString(SPStrings.selectedLogicalOperation1) ??
-            LogicOperatorLabel.lessThanOrEqual.value;
-    var selectedOperation2 =
-        SPHelper.sp.getString(SPStrings.selectedLogicalOperation2) ??
-            LogicOperatorLabel.greaterThanOrEqual.value;
-    var tankLevel1 = SPHelper.sp.getInt(SPStrings.tankLevel1) ?? 7;
-    var tankLevel2 = SPHelper.sp.getInt(SPStrings.tankLevel2) ?? 95;
-    var switchTankLevel1 =
-        SPHelper.sp.getBool(SPStrings.switchTankLevel1) ?? false;
-    var switchTankLevel2 =
-        SPHelper.sp.getBool(SPStrings.switchTankLevel2) ?? false;
-
-    var appbarTitle = SPHelper.sp.getString(SPStrings.appBarTitle) ??
-        SPStrings.defaultAppBarTitle;
-
-    var appbarController = TextEditingController(text: appbarTitle);
-    var headerInfoController = TextEditingController(text: headerInfoText);
-    var emptyTankController =
-        TextEditingController(text: waterDistanceEmpty.toString());
-    var fullTankController =
-        TextEditingController(text: waterDistanceFull.toString());
-    var tankLevel1Controller =
-        TextEditingController(text: tankLevel1.toString());
-    var tankLevel2Controller =
-        TextEditingController(text: tankLevel2.toString());
-
     void displayWarningLevel({required double distance}) {
       final currentTankLevel = getTankLevelPercentage(distance);
 
